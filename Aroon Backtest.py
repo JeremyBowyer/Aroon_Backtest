@@ -87,8 +87,8 @@ def aroon_backtest(ticker, start, end, threshold):
 
 
     Summary_Matrix = [['Metric', 'Figure'],
-                      ['Benchmark Performance', '{0:.0%}'.format(PerformanceBenchmark)],
-                      ['Total Performance', '{0:.0%}'.format(PerformanceTotal)],
+                      ['Stock Performance', '{0:.0%}'.format(PerformanceBenchmark)],
+                      ['Strategy Performance', '{0:.0%}'.format(PerformanceTotal)],
                       ['Relative Performance', '{0:.0%}'.format(PerformanceTotal - PerformanceBenchmark)],
                       ['Average Performance', '{0:.0%}'.format(AvgPerformance)],
                       ['Average 3 Day Performance', '{0:.0%}'.format(AvgPerformance3day)],
