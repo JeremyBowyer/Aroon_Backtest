@@ -3,11 +3,15 @@
 ## and a performance threshold, and give back a table of summary stats
 
 def aroon_backtest(ticker, start, end, threshold):
-
     import datetime as dt
     import pandas as pd
     import pandas_datareader.data as web
     import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib import style
+    from matplotlib.finance import candlestick_ohlc
+    import matplotlib.dates as mdates
+    style.use('ggplot')
 
     # Store start/end dates
     start = dt.datetime.strptime(start, "%Y-%m-%d")
@@ -89,9 +93,9 @@ def aroon_backtest(ticker, start, end, threshold):
                       ['Average Performance', '{0:.0%}'.format(AvgPerformance)],
                       ['Average 3 Day Performance', '{0:.0%}'.format(AvgPerformance3day)],
                       ['Average Length', str(round(AvgLength, 1)) + " Days"],
-                      ['3D Performance Threshold Probability', '{0:.0%}'.format(ThresholdProbability3day)],
+                      ['3D Performance Threshold ' + str('{0:.0%}'.format(threshold)) + ' Probability', '{0:.0%}'.format(ThresholdProbability3day)],
                       ['3D Performance Positive Probability', '{0:.0%}'.format(PositiveProbability3day)],
-                      ['Performance Threshold Probability', '{0:.0%}'.format(ThresholdProbability)],
+                      ['Performance Threshold ' + str('{0:.0%}'.format(threshold)) + ' Probability', '{0:.0%}'.format(ThresholdProbability)],
                       ['Performance Positive Probability', '{0:.0%}'.format(PositiveProbability)]]
 
     fig, ax = plt.subplots()
@@ -99,7 +103,35 @@ def aroon_backtest(ticker, start, end, threshold):
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
 
-    # Table from Ed Smith answer
     ax.table(cellText=Summary_Matrix[1:11], colLabels=Summary_Matrix[0], loc='center')
 
+    # Reset index and convert to MDate, for charting purposes
+    df.reset_index(inplace=True)
+    df['Date'] = df['Date'].map(mdates.date2num)
 
+    # Create subplot grid
+    ax1 = plt.subplot2grid((15, 1), (0, 0), rowspan=5, colspan=1)
+    ax2 = plt.subplot2grid((15, 1), (5, 0), rowspan=1, colspan=1, sharex=ax1)
+    ax3 = plt.subplot2grid((15, 1), (10, 0), rowspan=2, colspan=1)
+    # Set Title
+    plt.suptitle(ticker, fontsize=28, fontweight='bold')
+    # Format axes
+    # plot 1
+    ax1.xaxis_date()
+    ax1.xaxis.set_visible(False)
+    # plot 2
+    ax2.xaxis_date()
+    # plot3
+    ax3.xaxis.set_visible(False)
+    ax3.yaxis.set_visible(False)
+    ax3.axis('off')
+
+    # Shade "hold" areas on candlestick chart
+    for dates in HoldsDates:
+        ax1.axvspan(dates[0], dates[-1], alpha=0.2, color='green')
+
+    # Create subplots
+    candlestick_ohlc(ax1, df[['Date', 'Open', 'High', 'Low', 'Close']].values, width=1, colorup='g', colordown='r')
+    ax2.plot(df['Date'], df['AroonHigh'], color='g')
+    ax2.plot(df['Date'], df['AroonLow'], color='r')
+    ax3.table(cellText=Summary_Matrix[1:11], colLabels=Summary_Matrix[0], loc='center')
