@@ -1,6 +1,7 @@
 ## This function will accept a ticker (string),
 ## start date and end date (as strings in the form %Y-%m-%d),
-## and a performance threshold, and give back a table of summary stats
+## and a performance threshold, and give back a candlestick
+## chart, an aroon up/down chart, and a table of  summary stats
 
 def aroon_backtest(ticker, start, end, threshold):
     import datetime as dt
@@ -39,7 +40,7 @@ def aroon_backtest(ticker, start, end, threshold):
         if df['Cross'][x] > 0 and (df['Cross'][x - 1] > 0 or df['Cross'][x + 1] > 0):
             hold.append(df['Close'][x])
             holdDates.append(df.index[x])
-            if df['Cross'][x + 1] <= 0:
+            if df['Cross'][x + 1] <= 0 or x == len(df)-2:
                 Holds.append(hold)
                 HoldsDates.append(holdDates)
                 hold = []
